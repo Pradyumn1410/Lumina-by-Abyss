@@ -1,0 +1,6 @@
+{
+  "name": "ABYSS - Luxury Deep-Sea Expeditions",
+  "description": "An immersive, cinematic, ultra-luxurious landing page for ABYSS, offering premium deep-sea voyages to the Mariana Trench, Titanic, and beyond.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

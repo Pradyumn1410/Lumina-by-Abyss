@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Flapping Seagull</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #56CCF2 0%, #2F80ED 100%);
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        /* Container that bobs the entire bird up and down */
+        .bird-container {
+            position: relative;
+            animation: bob 1.2s ease-in-out infinite;
+        }
+
+        svg {
+            width: 400px;
+            height: 400px;
+            overflow: visible;
+        }
+
+        /* Wing Animation Classes */
+        .wing-front {
+            /* Hinge point for the front wing */
+            transform-origin: 100px 105px; 
+            animation: flap-front 0.6s ease-in-out infinite;
+        }
+
+        .wing-back {
+            /* Hinge point for the back wing */
+            transform-origin: 100px 100px; 
+            animation: flap-back 0.6s ease-in-out infinite;
+        }
+
+        /* Keyframes for the flapping motion */
+        @keyframes flap-front {
+            0%, 100% { transform: rotate(-20deg); } /* Wing High */
+            50%      { transform: rotate(50deg); }  /* Wing Low */
+        }
+
+        @keyframes flap-back {
+            0%, 100% { transform: rotate(-30deg); } /* Wing High (slightly offset for depth) */
+            50%      { transform: rotate(60deg); }  /* Wing Low */
+        }
+
+        /* Keyframes for the body bobbing */
+        @keyframes bob {
+            0%, 100% { transform: translateY(0px); }
+            50%      { transform: translateY(-25px); }
+        }
+
+        /* Simple decorative clouds */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            animation: drift linear infinite;
+        }
+        
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+        }
+
+        .c1 { width: 120px; height: 40px; top: 20%; left: -150px; animation-duration: 25s; }
+        .c1::before { width: 50px; height: 50px; top: -20px; left: 15px; }
+        .c1::after { width: 70px; height: 70px; top: -35px; left: 45px; }
+
+        .c2 { width: 80px; height: 30px; top: 60%; left: -100px; animation-duration: 18s; animation-delay: 5s; }
+        .c2::before { width: 40px; height: 40px; top: -15px; left: 10px; }
+        .c2::after { width: 50px; height: 50px; top: -25px; left: 30px; }
+
+        @keyframes drift {
+            0%   { transform: translateX(-10vw); }
+            100% { transform: translateX(110vw); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Clouds -->
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+
+    <!-- The Seagull -->
+    <div class="bird-container">
+        <svg viewBox="0 0 200 200">
+            
+            <!-- BACK WING (Rendered behind the body) -->
+            <g class="wing-back">
+                <path d="M 100 100 Q 130 40 170 30 Q 140 65 90 100 Z" fill="#90a4ae" />
+                <path d="M 140 50 Q 160 35 170 30 Q 165 40 148 55 Z" fill="#263238" />
+            </g>
+            
+            <!-- TAIL -->
+            <path d="M 75 105 L 30 95 L 35 110 Z" fill="#eceff1" />
+            <path d="M 40 98 L 25 95 L 35 105 Z" fill="#263238" /> <!-- Black feather tips -->
+            
+            <!-- BODY -->
+            <ellipse cx="100" cy="105" rx="35" ry="16" fill="#ffffff" />
+            
+            <!-- HEAD & NECK -->
+            <path d="M 115 95 Q 135 80 145 90 Q 135 110 115 115 Z" fill="#ffffff" />
+            <circle cx="140" cy="88" r="10" fill="#ffffff" />
+            
+            <!-- BEAK (Yellow) -->
+            <polygon points="148,85 168,88 148,92" fill="#ffb300" />
+            <polygon points="148,89 165,90 148,92" fill="#ff8f00" /> <!-- Lower beak shadow -->
+            
+            <!-- EYE -->
+            <circle cx="143" cy="85" r="1.5" fill="#000000" />
+            
+            <!-- FRONT WING (Rendered in front of the body) -->
+            <g class="wing-front">
+                <!-- Main Grey Wing -->
+                <path d="M 100 105 Q 120 30 180 20 Q 140 65 85 105 Z" fill="#cfd8dc" />
+                <!-- Black Wing Tip -->
+                <path d="M 145 40 Q 165 25 180 20 Q 170 35 150 50 Z" fill="#37474f" />
+            </g>
+
+        </svg>
+    </div>
+
+</body>
+</html>

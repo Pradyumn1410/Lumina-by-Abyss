@@ -1,0 +1,316 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  --color-ocean-bg: #0A192F;
+  --color-ocean-secondary: #0D2847;
+  --color-ocean-deep: #122D4F;
+  --color-ocean-navy: #164170;
+  --color-ocean-mid: #1E6CA8;
+  --color-ocean-accent: #00D2FC;
+  --color-ocean-soft: #34D399;
+  --color-ocean-mist: #E3F2FD;
+  --color-ocean-muted: #B0C4D8;
+}
+
+/* ============================================================
+   BASE RESET & TYPOGRAPHY NORM
+   ============================================================ */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: #0A192F;
+    color: #E3F2FD;
+    font-family: "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    letter-spacing: -0.015em;
+    font-weight: 300;
+  }
+
+  p {
+    line-height: 1.8;
+    letter-spacing: 0.01em;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0A192F; }
+  ::-webkit-scrollbar-thumb { background: #1E6CA8; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00D2FC; }
+}
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================ */
+.font-display {
+  font-family: "Cormorant Garamond", Georgia, serif;
+}
+
+/* ============================================================
+   TEXT REVEAL SYSTEM — CSS-only, permanent visibility
+   Text starts hidden, animates in once, and NEVER disappears.
+   ============================================================ */
+.section-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 1;
+  will-change: opacity, transform;
+}
+
+.section-reveal[data-revealed="true"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+  display: block;
+}
+
+/* ============================================================
+   CONTINUOUS UNIFIED OCEAN BACKGROUND GRADIENT
+   Golden Sunset → Soft Peach → Coral → Pink → Lavender → Deep Blue → Navy → Abyss
+   ============================================================ */
+.ocean-bg {
+  background: linear-gradient(
+    180deg,
+    #FFC278 0%,    /* Warm golden yellow */
+    #FF9D76 4%,    /* Soft peach */
+    #F26B6B 9%,    /* Coral orange */
+    #D06497 15%,   /* Pink */
+    #7B5BA6 24%,   /* Lavender */
+    #2E4A7D 36%,   /* Deep blue overhead / shallow ocean */
+    #164170 52%,   /* Mid ocean blue */
+    #0A192F 75%,   /* Deep ocean navy */
+    #010812 100%   /* Hadal abyss */
+  );
+  position: relative;
+  min-height: 100vh;
+}
+
+.ocean-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 45% at 50% 10%, rgba(255, 174, 99, 0.18) 0%, rgba(200, 100, 160, 0.08) 50%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ocean-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(10, 25, 47, 0.5) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   NOISE TEXTURE OVERLAY
+   ============================================================ */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   APPLE LIQUID GLASS MATERIAL SYSTEM (UNIFIED)
+   ============================================================ */
+.glass {
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.12),
+    0 12px 40px rgba(0, 0, 0, 0.22);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.015);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 
+    inset 0 1px 0px rgba(255, 255, 255, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.12),
+    0 8px 32px rgba(0, 0, 0, 0.25);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(0, 210, 252, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    0 16px 48px rgba(0, 0, 0, 0.35);
+}
+
+.glass-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.875rem;
+  padding: 0.875rem 1.125rem;
+  color: #E3F2FD;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(0, 210, 252, 0.5);
+  box-shadow: 0 0 16px rgba(0, 210, 252, 0.15);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2.25rem;
+  background: rgba(0, 210, 252, 0.85);
+  color: #0A192F;
+  font-family: "Inter", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    0 4px 15px rgba(0, 210, 252, 0.20);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-primary:hover {
+  background: rgba(52, 211, 153, 0.95);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    0 12px 30px rgba(0, 210, 252, 0.35);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2.25rem;
+  background: rgba(255, 255, 255, 0.02);
+  color: #E3F2FD;
+  font-family: "Inter", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 
+    inset 0 1px 0px rgba(255, 255, 255, 0.1),
+    0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-outline:hover {
+  border-color: rgba(0, 210, 252, 0.4);
+  color: #34D399;
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    0 8px 20px rgba(0, 210, 252, 0.15);
+}
+
+/* ============================================================
+   HAIRLINES & DIVIDERS
+   ============================================================ */
+.hairline {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.border-subtle {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================================
+   ANIMATIONS & DRIFT UTILITIES
+   ============================================================ */
+@keyframes fishSwimLeft {
+  0% { transform: translateX(110vw) translateY(0px); }
+  25% { transform: translateX(75vw) translateY(-8px); }
+  50% { transform: translateX(40vw) translateY(4px); }
+  75% { transform: translateX(10vw) translateY(-6px); }
+  100% { transform: translateX(-15vw) translateY(0px); }
+}
+
+@keyframes fishSwimRight {
+  0% { transform: translateX(-15vw) translateY(0px) scaleX(-1); }
+  100% { transform: translateX(110vw) translateY(0px) scaleX(-1); }
+}
+
+@keyframes particleDrift {
+  0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+  10% { opacity: 0.15; }
+  90% { opacity: 0.15; }
+  100% { transform: translateY(-60px) translateX(20px); opacity: 0; }
+}
+
+/* ============================================================
+   SPACING & LAYOUT GRID SYSTEM
+   ============================================================ */
+.section-pad {
+  padding: 14rem 0;
+}
+
+.section-pad-lg {
+  padding: 20rem 0;
+}

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesmerizing Dynamic Baitball</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #001f3f 0%, #00050a 100%);
+            font-family: 'Courier New', monospace;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            color: rgba(0, 255, 200, 0.7);
+            font-size: 13px;
+            letter-spacing: 1px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .highlight {
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="ocean"></canvas>
+    <div id="ui">
+        <div>SYSTEM: <span class="highlight">DYNAMIC PARAMETRIC KNOT</span></div>
+        <div>DENSITY: <span id="densityUI" class="highlight">0.00</span></div>
+        <div>TOPOLOGY X: <span id="paramX" class="highlight">0.00</span></div>
+        <div>TOPOLOGY Y: <span id="paramY" class="highlight">0.00</span></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('ocean');
+        const ctx = canvas.getContext('2d');
+        const densityUI = document.getElementById('densityUI');
+        const paramXUI = document.getElementById('paramX');
+        const paramYUI = document.getElementById('paramY');
+
+        let width, height;
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- CONFIGURATION ---
+        const NUM_FISH = 2500; // Extreme density
+        const HISTORY_LENGTH = 180;
+        const pathHistory = [];
+
+        // Pre-fill history to prevent clumping
+        for (let i = 0; i < HISTORY_LENGTH; i++) {
+            pathHistory.push({ x: width / 2, y: height / 2 });
+        }
+
+        // --- THE FISH CLASS ---
+        class Fish {
+            constructor() {
+                this.x = width / 2 + (Math.random() - 0.5) * 500;
+                this.y = height / 2 + (Math.random() - 0.5) * 500;
+                this.vx = 0;
+                this.vy = 0;
+
+                // Position in the queue
+                this.followIndex = Math.floor(Math.random() * HISTORY_LENGTH);
+
+                // Polar coordinates for offset (allows beautiful uniform expansion/contraction)
+                let maxSpread = 100;
+                this.baseAngle = Math.random() * Math.PI * 2;
+                this.baseRadius = Math.random() * maxSpread;
+
+                // Visuals
+                this.size = 1.5 + Math.random() * 2;
+                this.color = Math.random() > 0.7 ? '#00e5ff' : '#0077aa';
+                if (Math.random() > 0.95) this.color = '#ffffff';
+
+                // Animation bounds
+                this.speedLimit = 5 + Math.random() * 2;
+                this.wobbleSpeed = 0.2 + Math.random() * 0.2;
+                this.phase = Math.random() * Math.PI * 2;
+            }
+
+            update(time, currentDensity) {
+                let target = pathHistory[this.followIndex];
+
+                // Apply dynamic density to the spatial offset
+                let dynamicOffsetX = Math.cos(this.baseAngle) * (this.baseRadius * currentDensity);
+                let dynamicOffsetY = Math.sin(this.baseAngle) * (this.baseRadius * currentDensity);
+
+                let desiredX = target.x + dynamicOffsetX;
+                let desiredY = target.y + dynamicOffsetY;
+
+                // Steer towards dynamic target
+                let dx = desiredX - this.x;
+                let dy = desiredY - this.y;
+
+                this.vx += dx * 0.015;
+                this.vy += dy * 0.015;
+
+                // Enforce velocity limits
+                let currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (currentSpeed > this.speedLimit) {
+                    this.vx = (this.vx / currentSpeed) * this.speedLimit;
+                    this.vy = (this.vy / currentSpeed) * this.speedLimit;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            draw(time) {
+                let angle = Math.atan2(this.vy, this.vx);
+                let wag = Math.sin(time * this.wobbleSpeed + this.phase) * 0.4;
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(angle + wag);
+
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.size * 2, 0);
+                ctx.lineTo(-this.size, -this.size * 0.6);
+                ctx.lineTo(-this.size * 1.3, 0);
+                ctx.lineTo(-this.size, this.size * 0.6);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        const school = [];
+        for (let i = 0; i < NUM_FISH; i++) {
+            school.push(new Fish());
+        }
+
+        // --- RANDOMIZED PARAMETRIC MATH ENGINE ---
+        let shapeTime = 0;
+
+        // Frequencies that drive the Lissajous knot
+        const params = {
+            f1: 1, f2: 1.5, f3: 2, f4: 0.5,
+            targetF1: 1, targetF2: 1.5, targetF3: 2, targetF4: 0.5
+        };
+
+        function getDynamicLeaderPos() {
+            let cx = width / 2;
+            let cy = height / 2;
+            let R = Math.min(cx, cy) * 0.75;
+
+            // 1% chance every frame to pick a completely new mathematical topology
+            if (Math.random() < 0.01) {
+                params.targetF1 = Math.random() * 4 - 2; // Range -2 to 2
+                params.targetF2 = Math.random() * 4 - 2;
+                params.targetF3 = Math.random() * 4 - 2;
+                params.targetF4 = Math.random() * 4 - 2;
+            }
+
+            // Smooth linear interpolation towards target frequencies
+            params.f1 += (params.targetF1 - params.f1) * 0.005;
+            params.f2 += (params.targetF2 - params.f2) * 0.005;
+            params.f3 += (params.targetF3 - params.f3) * 0.005;
+            params.f4 += (params.targetF4 - params.f4) * 0.005;
+
+            // Compound parametric equation mapping
+            let x = cx + R * Math.sin(shapeTime * params.f1) * Math.cos(shapeTime * params.f2);
+            let y = cy + R * Math.sin(shapeTime * params.f3) * Math.cos(shapeTime * params.f4);
+
+            shapeTime += 0.01;
+
+            // Update UI
+            if (shapeTime % 0.5 < 0.02) {
+                paramXUI.innerText = params.f1.toFixed(3) + " / " + params.f2.toFixed(3);
+                paramYUI.innerText = params.f3.toFixed(3) + " / " + params.f4.toFixed(3);
+            }
+
+            return { x, y };
+        }
+
+        // --- ANIMATION LOOP ---
+        let globalTime = 0;
+
+        function animate() {
+            // Motion blur trail effect
+            ctx.fillStyle = 'rgba(0, 5, 10, 0.35)';
+            ctx.fillRect(0, 0, width, height);
+
+            globalTime++;
+
+            // 1. Calculate the dynamic density breathing (Interference of two sine waves)
+            let densityFactor = 1.2 + 0.9 * Math.sin(globalTime * 0.003) + 0.6 * Math.cos(globalTime * 0.007);
+            densityFactor = Math.max(0.1, densityFactor); // Prevent it from inverting or collapsing entirely
+
+            if (globalTime % 10 === 0) densityUI.innerText = (densityFactor * 100).toFixed(0) + " %";
+
+            // 2. Plot new path
+            let leader = getDynamicLeaderPos();
+            pathHistory.unshift(leader);
+            if (pathHistory.length > HISTORY_LENGTH) {
+                pathHistory.pop();
+            }
+
+            // 3. Update fish swarm
+            for (let i = 0; i < NUM_FISH; i++) {
+                school[i].update(globalTime, densityFactor);
+                school[i].draw(globalTime);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>

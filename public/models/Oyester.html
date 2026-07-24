@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinctada Pearl Oyster - Perfect Hinge</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #051320;
+            font-family: 'Courier New', monospace;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ambient-light {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(0, 229, 255, 0), transparent 60%);
+            mix-blend-mode: screen;
+            pointer-events: none;
+            transition: background 1.5s ease;
+        }
+
+        /* 3D Scene Wrapper - Looking down at a 55-degree angle */
+        .scene {
+            perspective: 1200px;
+            transform: rotateX(55deg) rotateZ(0deg);
+            transform-style: preserve-3d;
+        }
+
+        .oyster {
+            width: 380px;
+            height: 380px;
+            transform-style: preserve-3d;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* --- SHELL GEOMETRY --- */
+        .shell {
+            position: absolute;
+            inset: 0;
+            /* Hinge at the BACK (top flat edge of the clam) */
+            transform-origin: 50% 10%;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .shell-inner,
+        .shell-outer {
+            position: absolute;
+            inset: 0;
+            clip-path: url(#shell-shape);
+            backface-visibility: hidden;
+        }
+
+        /* Dark exterior */
+        .shell-outer {
+            background: repeating-conic-gradient(from -90deg at 50% 10%, #111 0deg, #222 2deg, #111 4deg);
+        }
+
+        /* Glowing interior */
+        .shell-inner {
+            background: linear-gradient(135deg, #b39ddb 10%, #4dd0e1 90%);
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+        }
+
+        /* --- BOTTOM SHELL (Static) --- */
+        .bottom-shell {
+            /* Tilted slightly up towards the viewer */
+            transform: rotateX(10deg);
+        }
+
+        /* Inner face points UP towards camera */
+        .bottom-shell .shell-inner {
+            transform: translateZ(1px);
+        }
+
+        /* Outer face points DOWN into the floor */
+        .bottom-shell .shell-outer {
+            transform: rotateX(180deg) translateZ(1px);
+        }
+
+        /* --- TOP SHELL (Hinged Lid) --- */
+        .top-shell {
+            /* Tilted slightly down to close the gap */
+            transform: rotateX(-10deg);
+        }
+
+        /* Outer face points UP towards camera when closed */
+        .top-shell .shell-outer {
+            transform: translateZ(1px);
+        }
+
+        /* Inner face points DOWN (touching the bottom shell) */
+        .top-shell .shell-inner {
+            transform: rotateX(180deg) translateZ(1px);
+        }
+
+        /* --- THE PEARL --- */
+        .pearl-container {
+            position: absolute;
+            /* Centered in the shell */
+            top: 55%;
+            left: 50%;
+            width: 75px;
+            height: 75px;
+            /* Lifted slightly off the bottom shell */
+            transform: translate(-50%, -50%) translateZ(15px);
+            transform-style: preserve-3d;
+            pointer-events: none;
+        }
+
+        .pearl-shadow {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateZ(2px);
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 50%;
+            filter: blur(8px);
+        }
+
+        .pearl {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            /* Counter-rotates against the scene so the sphere highlight faces us */
+            transform: rotateX(-55deg);
+
+            background: radial-gradient(circle at 35% 35%, #888 0%, #333 40%, #111 100%);
+            box-shadow: inset -8px -8px 15px rgba(0, 0, 0, 0.9);
+            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* =========================================
+           OPEN STATE (CLICK TRIGGERED)
+           ========================================= */
+
+        /* Lifts the front lip UP and swings it BACK on the top hinge */
+        .oyster.is-open .top-shell {
+            transform: rotateX(-105deg);
+        }
+
+        /* Pearl lights up */
+        .oyster.is-open .pearl {
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e0f7fa 25%, #b39ddb 60%, #311b92 100%);
+            box-shadow: inset -8px -8px 15px rgba(0, 0, 0, 0.5), 0 0 40px #00ffff, 0 0 90px #b388ff;
+        }
+
+        /* --- UI OVERLAY --- */
+        #ui {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            color: rgba(0, 255, 200, 0.6);
+            font-size: 13px;
+            letter-spacing: 1px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .highlight {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        #statusText {
+            color: #888;
+            font-weight: bold;
+            transition: color 1s;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Clam SVG Path -->
+    <svg width="0" height="0">
+        <defs>
+            <clipPath id="shell-shape" clipPathUnits="objectBoundingBox">
+                <path d="M 0.25 0.1
+                    L 0.75 0.1
+                    C 1.0 0.1, 1.0 0.4, 1.0 0.6
+                    C 1.0 0.9, 0.8 1.0, 0.5 1.0
+                    C 0.2 1.0, 0.0 0.9, 0.0 0.6
+                    C 0.0 0.4, 0.0 0.1, 0.25 0.1 Z" />
+            </clipPath>
+        </defs>
+    </svg>
+
+    <div class="ambient-light" id="ambientLight"></div>
+
+    <div class="scene">
+        <div class="oyster" id="oyster" onclick="toggleOyster()">
+
+            <div class="shell bottom-shell">
+                <div class="shell-outer"></div>
+                <div class="shell-inner"></div>
+            </div>
+
+            <div class="pearl-shadow"></div>
+            <div class="pearl-container">
+                <div class="pearl"></div>
+            </div>
+
+            <div class="shell top-shell">
+                <div class="shell-outer"></div>
+                <div class="shell-inner"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="ui">
+        <div>SYSTEM: <span class="highlight">KINEMATICS CORRECTED</span></div>
+        <div>STATE: <span id="statusText">CLOSED (DORMANT)</span></div>
+        <div>INTERACTION: <span class="highlight">OPENS TOWARDS YOU</span></div>
+    </div>
+
+    <script>
+        function toggleOyster() {
+            const oyster = document.getElementById('oyster');
+            const statusText = document.getElementById('statusText');
+            const ambient = document.getElementById('ambientLight');
+
+            oyster.classList.toggle('is-open');
+
+            if (oyster.classList.contains('is-open')) {
+                statusText.innerText = "OPEN (LUMINESCENT)";
+                statusText.style.color = "#00e5ff";
+                ambient.style.background = "radial-gradient(circle at center, rgba(0, 229, 255, 0.2) 0%, transparent 60%)";
+            } else {
+                statusText.innerText = "CLOSED (DORMANT)";
+                statusText.style.color = "#888";
+                ambient.style.background = "radial-gradient(circle at center, rgba(0, 229, 255, 0) 0%, transparent 60%)";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

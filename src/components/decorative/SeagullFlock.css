@@ -1,0 +1,49 @@
+/* Seagull Wing Flap Animations */
+.wing-front {
+    transform-origin: 100px 105px;
+    animation-name: flap-front;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+.wing-back {
+    transform-origin: 100px 100px;
+    animation-name: flap-back;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+@keyframes flap-front {
+    0%, 100% { transform: rotate(-20deg); }
+    50%      { transform: rotate(50deg); }
+}
+
+@keyframes flap-back {
+    0%, 100% { transform: rotate(-30deg); }
+    50%      { transform: rotate(60deg); }
+}
+
+/* Seagull Body Bobbing */
+.seagull-bob {
+    animation-name: bird-bob;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+@keyframes bird-bob {
+    0%, 100% { transform: translateY(0px); }
+    50%      { transform: translateY(-25px); }
+}
+
+/* Seagull Drifting Across Screen */
+.seagull-drift {
+    animation-name: bird-drift;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+}
+
+@keyframes bird-drift {
+    0% { transform: translateX(0vw); }
+    100% { transform: translateX(120vw); }
+}
